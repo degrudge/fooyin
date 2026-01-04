@@ -19,6 +19,9 @@
 
 #include "waveseekbar.h"
 
+#include <QDir>
+#include <QFile>
+
 #include "settings/wavebarsettings.h"
 
 #include <core/track.h>
@@ -461,6 +464,29 @@ void WaveSeekBar::drawChannel(QPainter& painter, int channel, double height, int
                 painter.drawRect(rectMin);
             }
         }
+    if(m_mode & WaveMode::MoodBar) {
+        auto waveCentre =  static_cast<double>(centre);
+
+        const QColor black{0,0,0};
+
+        const QPointF pt1{x, waveCentre - (max.at(i) * maxScale)};
+        const QPointF pt2{x, waveCentre - (min.at(i) * minScale)};
+
+        const QRectF rectMax{x, pt1.y(), barWidth, std::abs(pt1.y() - waveCentre)};
+        const QRectF rectMin{x, waveCentre, barWidth, std::abs(waveCentre - pt2.y())};
+
+        const QColor moodbar {0,0,0};
+        //TODO: add a parser for mood files
+
+        setupPainter(painter, isInProgress, isPlayed, m_barWidth, progress, moodbar,
+                             moodbar, black);
+        setupPainter(painter, isInProgress, isPlayed, m_barWidth, progress, moodbar,
+                             moodbar, black);
+
+        painter.drawRect(rectMax);
+        painter.drawRect(rectMin);
+
+    }
     }
 }
 

@@ -61,6 +61,7 @@ private:
     QCheckBox* m_minMax;
     QCheckBox* m_rms;
     QCheckBox* m_silence;
+    QCheckBox* m_moodBar;
 
     QRadioButton* m_downmixOff;
     QRadioButton* m_downmixStereo;
@@ -83,6 +84,7 @@ WaveBarSettingsPageWidget::WaveBarSettingsPageWidget(SettingsManager* settings)
     , m_minMax{new QCheckBox(tr("Min/Max"), this)}
     , m_rms{new QCheckBox(tr("RMS"), this)}
     , m_silence{new QCheckBox(tr("Silence"), this)}
+    , m_moodBar{new QCheckBox(tr("MoodBar"), this)}
     , m_downmixOff{new QRadioButton(tr("Off"), this)}
     , m_downmixStereo{new QRadioButton(tr("Stereo"), this)}
     , m_downmixMono{new QRadioButton(tr("Mono"), this)}
@@ -134,6 +136,7 @@ WaveBarSettingsPageWidget::WaveBarSettingsPageWidget(SettingsManager* settings)
     modeLayout->addWidget(m_minMax);
     modeLayout->addWidget(m_rms);
     modeLayout->addWidget(m_silence);
+    modeLayout->addWidget(m_moodBar);
 
     auto* downmixGroupBox = new QGroupBox(tr("Downmix"), this);
     auto* downmixGroup    = new QButtonGroup(this);
@@ -229,6 +232,7 @@ void WaveBarSettingsPageWidget::load()
     m_minMax->setChecked(mode & WaveMode::MinMax);
     m_rms->setChecked(mode & WaveMode::Rms);
     m_silence->setChecked(mode & WaveMode::Silence);
+    m_moodBar->setChecked(mode & WaveMode::MoodBar);
 
     const auto downMixOption = static_cast<DownmixOption>(m_settings->value<Settings::WaveBar::Downmix>());
     if(downMixOption == DownmixOption::Off) {

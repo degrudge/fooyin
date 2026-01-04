@@ -174,15 +174,18 @@ void WaveBarWidget::contextMenuEvent(QContextMenuEvent* event)
     auto* minMaxMode  = new QAction(tr("Min/Max"), modeMenu);
     auto* rmsMode     = new QAction(tr("RMS"), modeMenu);
     auto* silenceMode = new QAction(tr("Silence"), modeMenu);
+    auto* moodMode    = new QAction(tr("MoodBar"), modeMenu);
 
     minMaxMode->setCheckable(true);
     rmsMode->setCheckable(true);
     silenceMode->setCheckable(true);
+    moodMode->setCheckable(true);
 
     const auto currentMode = static_cast<WaveModes>(m_settings->value<Settings::WaveBar::Mode>());
     minMaxMode->setChecked(currentMode & WaveMode::MinMax);
     rmsMode->setChecked(currentMode & WaveMode::Rms);
     silenceMode->setChecked(currentMode & WaveMode::Silence);
+    moodMode->setChecked(currentMode & WaveMode::MoodBar);
 
     auto updateMode = [this](WaveMode mode, bool enable) {
         auto updatedMode = static_cast<WaveModes>(m_settings->value<Settings::WaveBar::Mode>());
@@ -201,10 +204,13 @@ void WaveBarWidget::contextMenuEvent(QContextMenuEvent* event)
                      [updateMode](bool checked) { updateMode(WaveMode::Rms, checked); });
     QObject::connect(silenceMode, &QAction::triggered, this,
                      [updateMode](bool checked) { updateMode(WaveMode::Silence, checked); });
+    QObject::connect(moodMode, &QAction::triggered, this,
+                     [updateMode](bool checked) { updateMode(WaveMode::MoodBar, checked); });
 
     modeMenu->addAction(minMaxMode);
     modeMenu->addAction(rmsMode);
     modeMenu->addAction(silenceMode);
+    modeMenu->addAction(moodMode);
 
     auto* downmixMenu  = new QMenu(tr("Downmix"), menu);
     auto* downmixGroup = new QActionGroup(downmixMenu);

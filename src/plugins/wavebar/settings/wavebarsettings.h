@@ -51,6 +51,7 @@ enum WaveMode : uint32_t
     MinMax  = 1 << 0,
     Rms     = 1 << 1,
     Silence = 1 << 2,
+    MoodBar = 1 << 3,
     Default = MinMax | Rms,
 };
 Q_DECLARE_FLAGS(WaveModes, WaveMode)
