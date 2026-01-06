@@ -69,6 +69,7 @@ private:
     void drawChannel(QPainter& painter, int channel, double height, int first, int last, int y);
     void drawSilence(QPainter& painter, int first, int last, double y);
     void drawSeekTip();
+    std::vector<QColor> parseMoodFile();
 
     SettingsManager* m_settings;
 
@@ -91,6 +92,7 @@ private:
 
     WaveModes m_mode;
     Colours m_colours;
+    std::vector<QColor> m_mood;
 };
 } // namespace WaveBar
 } // namespace Fooyin

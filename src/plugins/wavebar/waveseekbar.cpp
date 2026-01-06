@@ -19,9 +19,6 @@
 
 #include "waveseekbar.h"
 
-#include <QDir>
-#include <QFile>
-
 #include "settings/wavebarsettings.h"
 
 #include <core/track.h>
@@ -32,6 +29,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QStyle>
+#include <QFile>
 
 using namespace Qt::StringLiterals;
 
@@ -84,6 +82,7 @@ WaveSeekBar::WaveSeekBar(SettingsManager* settings, QWidget* parent)
     , m_centreGap{settings->value<Settings::WaveBar::CentreGap>()}
     , m_mode{static_cast<WaveModes>(settings->value<Settings::WaveBar::Mode>())}
     , m_colours{settings->value<Settings::WaveBar::ColourOptions>().value<Colours>()}
+    , m_mood{parseMoodFile()}
 {
     setFocusPolicy(Qt::FocusPolicy(style()->styleHint(QStyle::SH_Button_FocusPolicy)));
 
@@ -475,13 +474,14 @@ void WaveSeekBar::drawChannel(QPainter& painter, int channel, double height, int
         const QRectF rectMax{x, pt1.y(), barWidth, std::abs(pt1.y() - waveCentre)};
         const QRectF rectMin{x, waveCentre, barWidth, std::abs(waveCentre - pt2.y())};
 
-        const QColor moodbar {0,0,0};
-        //TODO: add a parser for mood files
+        // .mood files are generated with a 1000 samples while a song may have more or less. rescale as needed.
+        const int rescaled_i = static_cast<int>(static_cast<double>(i)/m_data.sampleCount() * 999);
+        const auto moodColor = m_mood.at(rescaled_i);
 
-        setupPainter(painter, isInProgress, isPlayed, m_barWidth, progress, moodbar,
-                             moodbar, black);
-        setupPainter(painter, isInProgress, isPlayed, m_barWidth, progress, moodbar,
-                             moodbar, black);
+        setupPainter(painter, isInProgress, isPlayed, m_barWidth, progress, moodColor,
+                             moodColor, black);
+        setupPainter(painter, isInProgress, isPlayed, m_barWidth, progress, moodColor,
+                             moodColor, black);
 
         painter.drawRect(rectMax);
         painter.drawRect(rectMin);
@@ -547,6 +547,30 @@ void WaveSeekBar::drawSeekTip()
     seekTipPos.ry() = std::min(seekTipPos.y(), height());
 
     m_seekTip->setPosition(mapTo(window(), seekTipPos));
+}
+std::vector<QColor> WaveSeekBar::parseMoodFile()
+{
+    //TODO: Clementine and strawberry store .mood files alongside the track. But creating an m_track seems like
+    // a waste of memory
+    const auto filepath = QStringLiteral("stub");
+    QFile moodFile{filepath};
+    std::vector<QColor> colors;
+    if(!moodFile.open(QIODevice::ReadOnly)) {
+        return {};
+    }
+    QByteArray const moodData = moodFile.readAll();
+    moodFile.close();
+    //TODO: mood colors are rather dim. either use gavin's original algorithm or come up with something new.
+    for (int i{0}; i < moodData.size(); i += 3) {
+        QColor const color{
+                        qBound(0, static_cast<int>(moodData.at(i)), 255),
+                        qBound(0, static_cast<int>(moodData.at(i+1)), 255),
+                        qBound(0, static_cast<int>(moodData.at(i+2)), 255)
+                };
+
+        colors.emplace_back(color);
+    }
+    return colors;
 }
 } // namespace Fooyin::WaveBar
 
